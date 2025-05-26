@@ -1343,7 +1343,9 @@
           const cols = isMobile ? 2 : 3;
           const rows = Math.ceil(photos.length / cols);
           const photoWidth = collageCanvas.width / cols;
-          const photoHeight = (collageCanvas.height - headerHeight) / rows;
+const photoHeight = photoWidth * 3 / 4; // asumsikan rasio 4:3 (landscape)
+
+  
 
           // Gambar semua foto
           const promises = photos.map((photoData, index) => {
