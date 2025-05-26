@@ -1302,73 +1302,70 @@
         }
 
         async createAndDownloadCollage(photos) {
-          const collageCanvas = document.createElement("canvas");
-          const collageCtx = collageCanvas.getContext("2d");
+  const collageCanvas = document.createElement("canvas");
+  const collageCtx = collageCanvas.getContext("2d");
 
-          const isMobile = window.innerWidth <= 768;
+  const isMobile = window.innerWidth <= 768;
+  const headerHeight = 80;
 
-          // Tambah tinggi untuk header watermark
-          const headerHeight = 80;
+  // Ukuran canvas
+  collageCanvas.width = isMobile ? 800 : 1200;
 
-          // Ukuran canvas + header
-          if (isMobile) {
-            collageCanvas.width = 800;
-            collageCanvas.height = 1200 + headerHeight;
-          } else {
-            collageCanvas.width = 1200;
-            collageCanvas.height = 800 + headerHeight;
-          }
+  // Hitung jumlah kolom & baris
+  const cols = isMobile ? 2 : 3;
+  const rows = Math.ceil(photos.length / cols);
 
-          // Background putih
-          collageCtx.fillStyle = "#ffffff";
-          collageCtx.fillRect(0, 0, collageCanvas.width, collageCanvas.height);
+  // Hitung ukuran foto
+  const photoWidth = collageCanvas.width / cols;
+  const photoHeight = photoWidth * 3 / 4; // rasio 4:3 landscape
 
-          // Header watermark
-          collageCtx.font = "bold 28px Arial";
-          collageCtx.fillStyle = "#444";
-          collageCtx.textAlign = "center";
-          const now = new Date();
-          const dateString = now.toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          });
-          collageCtx.fillText(
-            `📸 Snapzify Photobooth – ${dateString}`,
-            collageCanvas.width / 2,
-            50
-          );
+  // Total tinggi canvas = tinggi semua baris + header
+  collageCanvas.height = rows * photoHeight + headerHeight;
 
-          // Hitung grid
-          const cols = isMobile ? 2 : 3;
-          const rows = Math.ceil(photos.length / cols);
-          const photoWidth = collageCanvas.width / cols;
-const photoHeight = photoWidth * 3 / 4; // asumsikan rasio 4:3 (landscape)
+  // Background putih
+  collageCtx.fillStyle = "#ffffff";
+  collageCtx.fillRect(0, 0, collageCanvas.width, collageCanvas.height);
 
-  
+  // Header watermark
+  collageCtx.font = "bold 28px Arial";
+  collageCtx.fillStyle = "#444";
+  collageCtx.textAlign = "center";
 
-          // Gambar semua foto
-          const promises = photos.map((photoData, index) => {
-            return new Promise((resolve) => {
-              const img = new Image();
-              img.onload = () => {
-                const col = index % cols;
-                const row = Math.floor(index / cols);
-                const x = col * photoWidth;
-                const y = row * photoHeight + headerHeight; // Tambah offset header
-                collageCtx.drawImage(img, x, y, photoWidth, photoHeight);
-                resolve();
-              };
-              img.src = photoData;
-            });
-          });
+  const now = new Date();
+  const dateString = now.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
 
-          await Promise.all(promises);
+  collageCtx.fillText(
+    `📸 Snapzify Photobooth – ${dateString}`,
+    collageCanvas.width / 2,
+    50
+  );
 
-          // Download hasil
-          const collageData = collageCanvas.toDataURL("image/jpeg", 0.9);
-          this.downloadSinglePhoto(collageData, "snapzify-collage.jpg");
-        }
+  // Gambar semua foto
+  const promises = photos.map((photoData, index) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+        const x = col * photoWidth;
+        const y = row * photoHeight + headerHeight; // mulai setelah header
+        collageCtx.drawImage(img, x, y, photoWidth, photoHeight);
+        resolve();
+      };
+      img.src = photoData;
+    });
+  });
+
+  await Promise.all(promises);
+
+  // Download hasil
+  const collageData = collageCanvas.toDataURL("image/jpeg", 0.9);
+  this.downloadSinglePhoto(collageData, "snapzify-collage.jpg");
+}
       }
 
       // Initialize photobooth when page loads
