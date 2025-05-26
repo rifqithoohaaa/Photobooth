@@ -1307,37 +1307,43 @@
 
   const isMobile = window.innerWidth <= 768;
   const headerHeight = 80;
-
-  // Ukuran canvas
-  collageCanvas.width = isMobile ? 800 : 1200;
-
-  // Hitung jumlah kolom & baris
   const cols = isMobile ? 2 : 3;
   const rows = Math.ceil(photos.length / cols);
 
-  // Hitung ukuran foto
-  const photoWidth = collageCanvas.width / cols;
-  const photoHeight = photoWidth * 3 / 4; // rasio 4:3 landscape
+  // Sementara nilai awal (akan diubah setelah gambar pertama dimuat)
+  let photoWidth = 0;
+  let photoHeight = 0;
 
-  // Total tinggi canvas = tinggi semua baris + header
+  // Muat satu gambar dulu untuk ambil rasio asli
+  const tempImg = new Image();
+  tempImg.src = photos[0];
+  await new Promise((resolve) => {
+    tempImg.onload = () => {
+      photoWidth = isMobile ? 350 : 400;
+      const aspectRatio = tempImg.naturalWidth / tempImg.naturalHeight;
+      photoHeight = photoWidth / aspectRatio;
+      resolve();
+    };
+  });
+
+  // Hitung ukuran canvas dari jumlah baris dan ukuran foto asli
+  collageCanvas.width = cols * photoWidth;
   collageCanvas.height = rows * photoHeight + headerHeight;
 
   // Background putih
   collageCtx.fillStyle = "#ffffff";
   collageCtx.fillRect(0, 0, collageCanvas.width, collageCanvas.height);
 
-  // Header watermark
+  // Watermark Header
   collageCtx.font = "bold 28px Arial";
   collageCtx.fillStyle = "#444";
   collageCtx.textAlign = "center";
-
   const now = new Date();
   const dateString = now.toLocaleDateString("id-ID", {
     day: "numeric",
     month: "long",
     year: "numeric"
   });
-
   collageCtx.fillText(
     `📸 Snapzify Photobooth – ${dateString}`,
     collageCanvas.width / 2,
@@ -1348,11 +1354,12 @@
   const promises = photos.map((photoData, index) => {
     return new Promise((resolve) => {
       const img = new Image();
+      img.crossOrigin = "anonymous";
       img.onload = () => {
         const col = index % cols;
         const row = Math.floor(index / cols);
         const x = col * photoWidth;
-        const y = row * photoHeight + headerHeight; // mulai setelah header
+        const y = row * photoHeight + headerHeight;
         collageCtx.drawImage(img, x, y, photoWidth, photoHeight);
         resolve();
       };
@@ -1362,7 +1369,6 @@
 
   await Promise.all(promises);
 
-  // Download hasil
   const collageData = collageCanvas.toDataURL("image/jpeg", 0.9);
   this.downloadSinglePhoto(collageData, "snapzify-collage.jpg");
 }
