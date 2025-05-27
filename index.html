@@ -624,27 +624,34 @@
   reader.onload = (event) => {
     const img = new Image();
     img.onload = () => {
-      const isMobile = window.innerWidth <= 768;
-      const canvasWidth = isMobile ? 600 : 800;
-      const aspectRatio = img.naturalWidth / img.naturalHeight;
-      const canvasHeight = canvasWidth / aspectRatio;
+  const isMobile = window.innerWidth <= 768;
+  const canvasWidth = isMobile ? 600 : 800;
+  const aspectRatio = img.naturalWidth / img.naturalHeight;
+  const canvasHeight = canvasWidth / aspectRatio;
 
-      this.canvas.width = canvasWidth;
-      this.canvas.height = canvasHeight;
+  this.canvas.width = canvasWidth;
+  this.canvas.height = canvasHeight;
 
-      this.ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+  // Gambar gambar dari galeri
+  this.ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
 
-      this.drawWatermark();
+  // Tambahkan frame dan sticker seperti kamera
+  this.drawFrameOnCanvas();
+  this.drawStickersOnCanvas();
 
-      const photoData = this.canvas.toDataURL("image/jpeg", 0.9);
-      const slot = this.getNextSlotIndex();
-      if (slot !== -1) {
-        this.photos[slot] = photoData;
-        this.updatePhotoStrip();
-        this.updateUI();
-        if (this.photos.every((p) => p !== null)) this.finishPhotos();
-      }
-    };
+  // Tambahkan watermark
+  this.drawWatermark();
+
+  // Simpan ke slot foto
+  const photoData = this.canvas.toDataURL("image/jpeg", 0.9);
+  const slot = this.getNextSlotIndex();
+  if (slot !== -1) {
+    this.photos[slot] = photoData;
+    this.updatePhotoStrip();
+    this.updateUI();
+    if (this.photos.every((p) => p !== null)) this.finishPhotos();
+  }
+};
     img.src = event.target.result;
   };
   reader.readAsDataURL(file);
