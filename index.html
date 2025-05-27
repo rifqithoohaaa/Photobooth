@@ -1356,13 +1356,21 @@
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
-        const col = index % cols;
-        const row = Math.floor(index / cols);
-        const x = col * photoWidth;
-        const y = row * photoHeight + headerHeight;
-        collageCtx.drawImage(img, x, y, photoWidth, photoHeight);
-        resolve();
-      };
+  const col = index % cols;
+  const row = Math.floor(index / cols);
+  const x = col * photoWidth;
+  const y = row * photoHeight + headerHeight;
+
+  // Gambar foto
+  collageCtx.drawImage(img, x, y, photoWidth, photoHeight);
+
+  // Tambahkan garis pembatas (grid)
+  collageCtx.strokeStyle = "#999"; // warna abu-abu terang
+  collageCtx.lineWidth = 3;
+  collageCtx.strokeRect(x, y, photoWidth, photoHeight);
+
+  resolve();
+};
       img.src = photoData;
     });
   });
