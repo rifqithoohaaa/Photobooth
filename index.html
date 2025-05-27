@@ -497,6 +497,11 @@
             <button class="btn btn-success" id="startBtn">
               🎬 Mulai Kamera
             </button>
+            <input type="file" id="uploadImage" accept="image/*" style="display: none;" />
+<button class="btn btn-secondary" onclick="document.getElementById('uploadImage').click()">
+  🖼 Upload dari Galeri
+</button>
+
           </div>
 
           <div class="retake-counter">
@@ -610,6 +615,41 @@
           document
             .getElementById("clearStickers")
             .addEventListener("click", () => this.clearStickers());
+
+          document.getElementById("uploadImage").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const img = new Image();
+    img.onload = () => {
+      const isMobile = window.innerWidth <= 768;
+      const canvasWidth = isMobile ? 600 : 800;
+      const aspectRatio = img.naturalWidth / img.naturalHeight;
+      const canvasHeight = canvasWidth / aspectRatio;
+
+      this.canvas.width = canvasWidth;
+      this.canvas.height = canvasHeight;
+
+      this.ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+
+      this.drawWatermark();
+
+      const photoData = this.canvas.toDataURL("image/jpeg", 0.9);
+      const slot = this.getNextSlotIndex();
+      if (slot !== -1) {
+        this.photos[slot] = photoData;
+        this.updatePhotoStrip();
+        this.updateUI();
+        if (this.photos.every((p) => p !== null)) this.finishPhotos();
+      }
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
 
           // Frame selection
           document.querySelectorAll(".frame-option").forEach((option) => {
