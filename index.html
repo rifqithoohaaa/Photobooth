@@ -1411,10 +1411,10 @@
   // Gambar foto
   collageCtx.drawImage(img, x, y, photoWidth, photoHeight);
 
-  // Tambahkan garis pembatas (grid)
-  collageCtx.strokeStyle = "#999"; // warna abu-abu terang
-  collageCtx.lineWidth = 3;
-  collageCtx.strokeRect(x, y, photoWidth, photoHeight);
+  // Tambahkan garis pembatas
+collageCtx.strokeStyle = "#ffffff"; // putih
+collageCtx.lineWidth = 4;
+collageCtx.strokeRect(x, y, photoWidth, photoHeight);
 
   resolve();
 };
